@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Najbliższa data</title>
-    <style>
+ <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -36,7 +36,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
+            font-size: 24px;
             font-weight: bold;
             color: #4b2d0c;
         }
@@ -55,6 +55,10 @@
             font-weight: bold;
         }
 
+        #next-date, #timer, #last-timer {
+            color: #e63946; /* Odcień czerwieni */
+        }
+
         footer {
             margin-top: 20px;
             font-size: 14px;
@@ -66,33 +70,56 @@
             const startDate = new Date("2024-12-13T15:23:00");
             const interval = (1 * 60 * 60 * 1000) + (2 * 60 * 1000) + (30 * 1000);
 
+            let nextDate = calculateNextDate();
+            let lastDate = calculateLastDate();
+
             function calculateNextDate() {
                 const now = new Date();
-                let nextDate = new Date(startDate);
-                while (nextDate <= now) {
-                    nextDate = new Date(nextDate.getTime() + interval);
+                let next = new Date(startDate);
+                while (next <= now) {
+                    next = new Date(next.getTime() + interval);
                 }
-                return nextDate;
+                return next;
+            }
+
+            function calculateLastDate() {
+                const now = new Date();
+                let last = new Date(startDate);
+                while (last.getTime() + interval <= now.getTime()) {
+                    last = new Date(last.getTime() + interval);
+                }
+                return last;
             }
 
             function updateTimer() {
                 const now = new Date();
-                const diff = nextDate - now;
+                const diffToNext = nextDate - now;
+                const diffFromLast = now - lastDate;
 
-                if (diff <= 0) {
+                if (diffToNext <= 0) {
+                    lastDate = nextDate;
                     nextDate = calculateNextDate();
                 }
 
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                const hoursToNext = Math.floor(diffToNext / (1000 * 60 * 60));
+                const minutesToNext = Math.floor((diffToNext % (1000 * 60 * 60)) / (1000 * 60));
+                const secondsToNext = Math.floor((diffToNext % (1000 * 60)) / 1000);
 
-                const timeString = hours > 0 
-                    ? `${hours} godzin, ${minutes} minut, ${seconds} sekund` 
-                    : `${minutes} minut, ${seconds} sekund`;
+                const timeToNextString = hoursToNext > 0 
+                    ? `${hoursToNext} godzin, ${minutesToNext} minut, ${secondsToNext} sekund` 
+                    : `${minutesToNext} minut, ${secondsToNext} sekund`;
+
+                const hoursFromLast = Math.floor(diffFromLast / (1000 * 60 * 60));
+                const minutesFromLast = Math.floor((diffFromLast % (1000 * 60 * 60)) / (1000 * 60));
+                const secondsFromLast = Math.floor((diffFromLast % (1000 * 60)) / 1000);
+
+                const timeFromLastString = hoursFromLast > 0 
+                    ? `${hoursFromLast} godzin, ${minutesFromLast} minut, ${secondsFromLast} sekund` 
+                    : `${minutesFromLast} minut, ${secondsFromLast} sekund`;
 
                 document.getElementById('next-date').textContent = nextDate.toLocaleTimeString('pl-PL');
-                document.getElementById('timer').textContent = timeString;
+                document.getElementById('timer').textContent = timeToNextString;
+                document.getElementById('last-timer').textContent = timeFromLastString;
             }
 
             function init() {
@@ -108,10 +135,11 @@
     <div class="container">
         <div class="logo">DZ</div>
         <h1>Kiedy spaną metiny</h1>
-        <p>Interwał<strong>1 godzina, 2 minuty, 30 sekund</strong></p>
+        <p>Interwał<strong> 1 godzina 2 minuty, 30 sekund</strong></p>
 		<p>Data początkowa obliczeń: <strong>2024-12-13 15:23:00</strong>
-        <p>Najbliższa godzina:<strong><span id="next-date">Ładowanie...</span></strong></p>
+        <p><h2>Najbliższa godzina:<strong><span id="next-date">Ładowanie...</span></strong></h2></p>
         <p class="timer">Pozostało: <span id="timer">Ładowanie...</span></p>
+		<p class="timer">Ostatni resp: <span id="last-timer">Ładowanie...</span></p>
         <footer>Autor: DZacheja<br>Nick: <strong>Mniami</strong></footer>
     </div>
 </body>
